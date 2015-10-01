@@ -1,19 +1,23 @@
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import tree
+from sklearn.pipeline import Pipeline
 import pandas as pd
 import numpy as np
-from sklearn import ensemble
-from sklearn.feature_extraction import DictVectorizer as DV
 
-train = pd.read_csv('/home/pnagwanshi/Kaggle/Liberty/train.csv')
-test = pd.read_csv('/home/pnagwanshi/Kaggle/Liberty/test.csv')
+s_data = []
+s_labels = []
+t_data = []
+t_labels = []
+d={}
+z=0
 
-ids = test['Id']
-y = train['Hazard']
-#print train
-train = train.drop(['Hazard', 'Id'], axis=1)
-#print train
-test = test.drop(['Id'], axis=1)
+train = pd.read_csv("train.csv")
+test  = pd.read_csv("test.csv")
+print("train")
+print(train.head())
+print("testhead")
+test.head()
 
-# get the categorical columns
 fact_cols = ['T1_V4', 'T1_V5', 'T1_V6', 'T1_V7', 'T1_V8', 'T1_V9', 'T1_V11', 
 'T1_V12', 'T1_V15', 'T1_V16', 'T1_V17', 'T2_V3', 'T2_V5', 'T2_V11', 'T2_V12',
 'T2_V13']
@@ -21,31 +25,107 @@ fact_train = train[fact_cols]
 fact_test = test[fact_cols]
 
 #put the numerical as matrix
-num_train_data = train.drop(fact_cols, axis=1).as_matrix()
-num_test_data = test.drop(fact_cols, axis=1).as_matrix()
+train.drop(fact_cols, axis=1).as_matrix()
+test.drop(fact_cols, axis=1).as_matrix()
+'''
+train.drop('T1_V4', axis=1, inplace=True)
+train.drop('T1_V5', axis=1, inplace=True)
+train.drop('T1_V6', axis=1, inplace=True)
+train.drop('T1_V11', axis=1, inplace=True)
+train.drop('T2_V13', axis=1, inplace=True)
+train.drop('T2_V14', axis=1, inplace=True)
+train.drop('T2_V15', axis=1, inplace=True)
+train.drop('T1_V8', axis=1, inplace=True)
+train.drop('T1_V9', axis=1, inplace=True)
+train.drop('T1_V12', axis=1, inplace=True)
+train.drop('T1_V14', axis=1, inplace=True)
+train.drop('T1_V15', axis=1, inplace=True)
+train.drop('T1_V17', axis=1, inplace=True)
+train.drop('T2_V3', axis=1, inplace=True)
+train.drop('T2_V5', axis=1, inplace=True)
+train.drop('T2_V6', axis=1, inplace=True)
+train.drop('T2_V11', axis=1, inplace=True)
+train.drop('T2_V12', axis=1, inplace=True)
+train.drop('T2_V8', axis=1, inplace=True)
+train.drop('T1_V7', axis=1, inplace=True)
+train.drop('T2_V10', axis=1, inplace=True)
+train.drop('T2_V7', axis=1, inplace=True)
+train.drop('T1_V13', axis=1, inplace=True)
+train.drop('T1_V10', axis=1, inplace=True)
 
-#transform the categorical to dict
-dict_train_data = fact_train.T.to_dict().values()
-dict_test_data = fact_test.T.to_dict().values()
+test.drop('T1_V4', axis=1, inplace=True)
+test.drop('T1_V5', axis=1, inplace=True)
+test.drop('T1_V6', axis=1, inplace=True)
+test.drop('T1_V11', axis=1, inplace=True)
+test.drop('T2_V13', axis=1, inplace=True)
+test.drop('T2_V14', axis=1, inplace=True)
+test.drop('T2_V15', axis=1, inplace=True)
+test.drop('T1_V8', axis=1, inplace=True)
+test.drop('T1_V9', axis=1, inplace=True)
+test.drop('T1_V12', axis=1, inplace=True)
+test.drop('T1_V14', axis=1, inplace=True)
+test.drop('T1_V15', axis=1, inplace=True)
+test.drop('T1_V17', axis=1, inplace=True)
+test.drop('T2_V3', axis=1, inplace=True)
+test.drop('T2_V5', axis=1, inplace=True)
+test.drop('T2_V6', axis=1, inplace=True)
+test.drop('T2_V11', axis=1, inplace=True)
+test.drop('T2_V12', axis=1, inplace=True)
+test.drop('T2_V8', axis=1, inplace=True)
+test.drop('T1_V7', axis=1, inplace=True)
+test.drop('T2_V10', axis=1, inplace=True)
+test.drop('T2_V7', axis=1, inplace=True)
+test.drop('T1_V13', axis=1, inplace=True)
+test.drop('T1_V10', axis=1, inplace=True)
+'''
+col = train.columns
+for i in range(len(train.Id)):
+    s=[]
+    for j in range(2,len(col)):
+        w=col[j]+"_"+str(train[col[j]][i])
+        if w in d:
+            y = int(d[w])
+        else:
+            z+=1
+            d[w]=int(z)
+            y=int(z)
+        s.append(int(y))
+    s_data.append(list(s))
+    s_labels.append("X"+str(train["Hazard"][i]))
 
-#vectorize
-vectorizer = DV(sparse = False)
-vec_train_data = vectorizer.fit_transform(dict_train_data)
-vec_test_data = vectorizer.fit_transform(dict_test_data)
 
-#merge numerical and categorical sets
-x_train = np.hstack((num_train_data, vec_train_data))
-x_test = np.hstack((num_test_data, vec_test_data))
-print x_test
-x_test_new = np.array(zip((num_test_data, vec_test_data)))
-print x_test_new
-#print np.shape(x_train)
-#print np.shape(x_test)
+col = test.columns
+for i in range(len(test.Id)):
+    s=[]
+    for j in range(1,len(col)):
+        w=col[j]+"_"+str(test[col[j]][i])
+        if w in d:
+            y = int(d[w])
+        else:
+            z+=1
+            d[w]=int(z)
+            y=int(z)
+        s.append(int(y))
+    t_data.append(list(s))
+    
+print(("\n").join(str(d).split(",")))
 
-rf = ensemble.RandomForestRegressor(n_estimators=200, max_depth=10)
-rf.fit(x_train, y)
-pred = rf.predict(x_test)
+s_data=np.array(s_data)
+t_data=np.array(t_data)
 
-preds = pd.DataFrame({"Id": ids, "Hazard": pred})
-preds = preds[['Id', 'Hazard']]
-preds.to_csv('submit.csv', index=False)
+clf = Pipeline([('rfc', RandomForestClassifier(n_estimators = 10, n_jobs=-1))])
+clf.fit(s_data, s_labels)
+t_labels = clf.predict(t_data)
+t_labels = [z[1:] for z in t_labels]
+submission = pd.DataFrame({"Id": test.Id, "Hazard": t_labels})
+submission.to_csv("random_forest.csv", index=False)
+
+print(clf.named_steps['rfc'].feature_importances_)
+i = 0
+print(clf.named_steps['rfc'].estimators_)
+#for t in clf.named_steps['rfc'].estimators_:
+#    f = open(str(i) + '.dot', 'w')
+#    tree.export_graphviz(t, out_file = f)
+#    f.close
+#    i += 1
+                
